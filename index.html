@@ -1,0 +1,1427 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>リバイスの技法 — プロンプト集 50</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1f2e;
+    --surface2: #242938;
+    --accent: #e8693a;
+    --accent2: #4a9eff;
+    --text: #e2e8f0;
+    --text-muted: #8892a4;
+    --border: #2d3448;
+    --copy-ok: #34c77b;
+    --tag-bg: #2a3040;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--surface);
+    border-bottom: 2px solid var(--accent);
+    padding: 24px 20px 20px;
+    text-align: center;
+  }
+  header h1 { font-size: 1.4rem; font-weight: 700; color: var(--text); letter-spacing: 0.03em; }
+  header p { color: var(--text-muted); font-size: 0.85rem; margin-top: 6px; }
+  .badge {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 20px;
+    margin-top: 8px;
+  }
+
+  /* ── How to use ── */
+  .howto {
+    background: var(--surface2);
+    border-left: 3px solid var(--accent2);
+    margin: 20px 16px;
+    padding: 14px 16px;
+    border-radius: 0 8px 8px 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+  .howto strong { color: var(--text); }
+  .howto ol { padding-left: 18px; margin-top: 6px; }
+  .howto li { margin-top: 4px; }
+
+  /* ── Category Nav ── */
+  nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 16px;
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    z-index: 100;
+  }
+  nav a {
+    text-decoration: none;
+    background: var(--surface);
+    color: var(--text-muted);
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 1px solid var(--border);
+    transition: all 0.15s;
+  }
+  nav a:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  /* ── Section ── */
+  section { padding: 0 16px 8px; }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 28px 0 14px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+  .section-label {
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+  }
+  .section-header h2 { font-size: 1rem; font-weight: 700; }
+  .section-count { color: var(--text-muted); font-size: 0.8rem; margin-left: auto; }
+
+  /* ── Prompt Card ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px 16px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .pid {
+    background: var(--tag-bg);
+    color: var(--accent);
+    font-size: 0.72rem;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 2px;
+    letter-spacing: 0.04em;
+  }
+  .card-title { font-size: 0.9rem; font-weight: 600; flex: 1; }
+  .copy-btn {
+    flex-shrink: 0;
+    background: var(--surface2);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 12px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .copy-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .copy-btn.ok { background: var(--copy-ok); color: #fff; border-color: var(--copy-ok); }
+
+  .card-meta {
+    padding: 8px 16px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+  }
+  .meta-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .meta-tag .label { opacity: 0.6; }
+
+  .prompt-body {
+    padding: 14px 16px;
+  }
+  pre.prompt-text {
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 0.82rem;
+    line-height: 1.65;
+    color: #c9d1e3;
+  }
+  .placeholder {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* ── Footer ── */
+  footer {
+    text-align: center;
+    padding: 40px 16px;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    border-top: 1px solid var(--border);
+    margin-top: 20px;
+  }
+  footer strong { color: var(--text); }
+
+  @media (max-width: 480px) {
+    header h1 { font-size: 1.15rem; }
+    .card-header { flex-wrap: wrap; }
+    .copy-btn { align-self: flex-end; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>リバイスの技法</h1>
+  <p>1,317件のデータと50の手筋で査読を乗り越える</p>
+  <span class="badge">プロンプト集 50</span>
+</header>
+
+<div class="howto">
+  <strong>使い方</strong>
+  <ol>
+    <li>使いたいプロンプトの <strong>コピー</strong> ボタンを押す</li>
+    <li><code style="color:var(--accent)">[...]</code> の部分に自分の素材を貼り付ける</li>
+    <li>ChatGPT / Claude / Gemini に投げる</li>
+    <li>出力をそのまま使わない。最終チェックは必ず自分で行う</li>
+  </ol>
+</div>
+
+<nav>
+  <a href="#A">A コメント分類</a>
+  <a href="#B">B Response起草</a>
+  <a href="#C">C Pushback</a>
+  <a href="#D">D 追加実験</a>
+  <a href="#E">E 再投稿</a>
+  <a href="#F">F 英文Tone</a>
+  <a href="#G">G 自己点検</a>
+</nav>
+
+<!-- ══════════════════════════════════════════ A ══ -->
+<section id="A">
+  <div class="section-header">
+    <span class="section-label">A</span>
+    <h2>コメント分析・分類</h2>
+    <span class="section-count">7個 / #A-01〜#A-07</span>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">A-01</span>
+      <span class="card-title">全コメントを6類型に分類する</span>
+      <button class="copy-btn" onclick="copyPrompt('p-A01')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> decision letter受領直後の機械的整理</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #4, #8, #9</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-A01">あなたは査読コメントの分類アシスタントだ。以下のreviewer commentsを読み、各コメントを以下の6タイプのいずれかに分類せよ。
+
+タイプ:
+- conceptual_clarification: 概念・解釈の明確化要求
+- data_strengthening: 追加データ・実験・解析を要求
+- decorative_request: 体裁・表現・引用の修正
+- political_signal: 特定研究者の引用・流派への配慮要求
+- misreading_correction: 著者の記述を誤読した指摘
+- fundamental_critique: 研究の根本前提・主要結論への異議
+
+出力形式: 表 (Comment ID | type | 一行根拠)
+
+[ここに全reviewer commentsを貼る]</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">A-02</span>
+      <span class="card-title">severity (L1/L2/L3) を判定する</span>
+      <button class="copy-btn" onclick="copyPrompt('p-A02')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> 戦力配分の前段</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #4, #5</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-A02">以下のreviewer commentsを1件ずつseverity判定せよ。
+
+判定ルール:
+- L1 must_address: must / essential / required / cannot accept / 強い反対の語彙
+- L2 should_address: should / important / strongly recommend
+- L3 optional: could / might / it would be interesting / nice to have
+
+出力形式: Comment ID | L1/L2/L3 | 判定根拠の英語フレーズを1つ抽出
+
+[ここにreviewer commentsを貼る]</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">A-03</span>
+      <span class="card-title">1コメントに複数要求が含まれているか検出</span>
+      <button class="copy-btn" onclick="copyPrompt('p-A03')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> 単一返信で済むか分割すべきか判断</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #16</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-A03">以下のreviewer commentを読み、独立した要求が何件含まれているか判定せよ。
+
+出力形式:
+- 含まれる要求(箇条書き)
+- 単一返信で対応可 / 分割推奨
+
+[ここに1件のreviewer commentを貼る]</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">A-04</span>
+      <span class="card-title">reviewerのトーン分析</span>
+      <button class="copy-btn" onclick="copyPrompt('p-A04')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> 強い表現のコメントを見落とさない</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #41</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-A04">以下のreviewer全コメント (round 1) を読み、各reviewerの総合トーンを5段階で判定せよ。
+
+軸: 攻撃的 (1) / 厳しいが建設的 (2) / 中立 (3) / 協力的 (4) / 称賛中心 (5)
+出力: Reviewer N | トーン | 根拠フレーズ2つ
+
+[ここに全reviewer commentsを貼る]</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">A-05</span>
+      <span class="card-title">decision letterからeditorのメタメッセージを抽出</span>
+      <button class="copy-btn" onclick="copyPrompt('p-A05')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> "major revision"の裏にある編集者の本音を読む</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #3</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-A05">以下はjournal editorのdecision letterの本文だ。次の4点を抽出せよ。
+
+1. 全体の判定 (major / minor / reject)
+2. editor自身が重視しているreviewerは誰か (reviewer番号)
+3. editorが示した期待値 (例: "we expect substantial revision")
+4. 隠れシグナル (例: "this is your one chance" 等の暗喩)
+
+[ここにdecision letterを貼る]</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">A-06</span>
+      <span class="card-title">必須応答 vs 任意応答の振り分け</span>
+      <button class="copy-btn" onclick="copyPrompt('p-A06')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> 戦力集中先の確定</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #5, #6</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-A06">以下のreviewer commentsのうち、応答必須 (L1) と応答任意 (L2/L3) を振り分け、L1の中で「飲むべきもの」と「議論余地ありのもの」を区別せよ。
+
+出力形式: 表
+Comment ID | L1/L2/L3 | 飲む or 議論 | 根拠1行
+
+[ここにreviewer commentsを貼る]</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">A-07</span>
+      <span class="card-title">fundamental_critique検出</span>
+      <button class="copy-btn" onclick="copyPrompt('p-A07')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> 全コメントの約4%の最重要案件を見逃さない</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #10</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-A07">以下のreviewer commentsのうち、研究の根本前提・主要結論への異議に該当するものを抽出せよ。
+
+判断基準: 1件でも実証されれば論文の主張が揺らぐもの。
+
+出力形式: Comment ID | 該当 yes/no | 揺らぐ主張の1行特定
+
+[ここにreviewer commentsを貼る]</pre>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ B ══ -->
+<section id="B">
+  <div class="section-header">
+    <span class="section-label">B</span>
+    <h2>Response Letter 起草</h2>
+    <span class="section-count">9個 / #B-08〜#B-16</span>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">B-08</span>
+      <span class="card-title">Cover letter 3段落初稿</span>
+      <button class="copy-btn" onclick="copyPrompt('p-B08')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> 最初の挨拶段落</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #17</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-B08">以下の論文情報とdecision letter要約をもとに、Response Letterの冒頭cover letterを3段落で起草せよ。
+
+段落1: 査読への感謝 (1〜2文)
+段落2: 主要な変更点3つの要約
+段落3: editorとreviewerへの敬意の一文
+
+トーン: 簡潔、過度な敬語を避ける、事実ベース。
+
+[論文タイトル / decision letter要約 / 主要変更点3つを貼る]</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">B-09</span>
+      <span class="card-title">個別コメントへの4部構成返信</span>
+      <button class="copy-btn" onclick="copyPrompt('p-B09')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> 全コメント返信の標準テンプレート</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #18</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-B09">以下のreviewer comment 1件に対する返信を、4部構成で書け。
+
+構成:
+1. 引用: We thank Reviewer for ... (1文)
+2. 認識: 我々の理解は (...) である (1〜2文)
+3. 行動: 改訂で (...) を行った (2〜4文)
+4. 該当箇所: see page X, line Y (1文)
+
+[reviewer comment + 自分の改訂内容を貼る]</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">B-10</span>
+      <span class="card-title">Response Letter全体ドラフトの骨組み生成</span>
+      <button class="copy-btn" onclick="copyPrompt('p-B10')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> 全コメント数に応じた返信ドラフトの骨格</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #18, #23</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-B10">以下のN件のreviewer commentsと各コメントへの自分の対応方針を読み、Response Letterの全体ドラフトを生成せよ。
+
+ルール:
+- 1 comment = 1段落
+- 各段落は4部構成 (引用→認識→行動→該当箇所)
+- 全体冒頭に3段落のcover letter
+- reviewer番号順、comment番号順
+
+[全reviewer comments + 各コメントへの対応方針を貼る]</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">B-11</span>
+      <span class="card-title">修正箇所の対応マッピング表</span>
+      <button class="copy-btn" onclick="copyPrompt('p-B11')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> reviewerの確認コストを下げる</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #19</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-B11">以下のreviewer commentsと本文の修正版を照合し、各コメントに対する修正箇所 (page, line, 修正前→修正後) を表で出力せよ。
+
+出力形式: Comment ID | 修正箇所 (page, line) | before → afterの差分要約
+
+[reviewer comments + 修正前後の本文を貼る]</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">B-12</span>
+      <span class="card-title">non-native弱腰表現の修正</span>
+      <button class="copy-btn" onclick="copyPrompt('p-B12')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> "perhaps" "we believe" の連発を整える</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #21</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-B12">以下の英文response letterから、non-native著者特有の弱腰表現を検出し、より直接的な表現に修正せよ。
+
+検出対象: "perhaps", "we believe", "it might be possible", "we hope", "we would like to"
+修正方針: 事実ベースに置き換える。"We added ..." "Figure 3 shows ..." 等。
+
+[response letter草稿を貼る]</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">B-13</span>
+      <span class="card-title">"Thank you" 連打を整理</span>
+      <button class="copy-btn" onclick="copyPrompt('p-B13')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> 各コメント冒頭の感謝を均す</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #22</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-B13">以下のresponse letterから "Thank you for ..." の冒頭表現を検出し、出現が連続する箇所を整理せよ。
+
+ルール:
+- cover letter冒頭に1回だけ残す
+- 個別コメント返信では "We have addressed this concern by ..." のような行動文に置き換える
+
+[response letter草稿を貼る]</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">B-14</span>
+      <span class="card-title">修正箇所を青字にするための差分検出</span>
+      <button class="copy-btn" onclick="copyPrompt('p-B14')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> 改訂版本文に色付けする箇所を特定</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #19</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-B14">以下の "原文 (revised)" と "原文 (original)" を比較し、変更された文・追加された文・削除された文を特定せよ。
+
+出力形式: 段落番号 | 変更タイプ (追加/削除/修正) | 該当文章
+
+[original本文 / revised本文を貼る]</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">B-15</span>
+      <span class="card-title">Round 2用のトーン調整</span>
+      <button class="copy-btn" onclick="copyPrompt('p-B15')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> round後期の粘り強い返信に切り替える</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #7, #42</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-B15">以下はRound 1で書いたresponse letterの一部だ。Round 2用に、以下のルールでトーンを調整せよ。
+
+ルール:
+- "we apologize" は削除する (2回謝らない)
+- 既に説明済みの点は簡潔に "as previously stated, ..." で参照する
+- reviewerの繰り返し質問には根拠を添えてpushbackの要素を強める
+
+[Round 1 responseの一部を貼る]</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">B-16</span>
+      <span class="card-title">全response letterのtone一貫性チェック</span>
+      <button class="copy-btn" onclick="copyPrompt('p-B16')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> 段落間でトーンが揺れていないかの最終確認</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #18</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-B16">以下のresponse letter全文を読み、段落ごとに以下を判定せよ。
+
+軸: 過度に丁寧 (1) / 適切 (2) / やや強い (3) / 攻撃的 (4)
+
+出力: 段落番号 | 判定 | 該当フレーズ抽出
+最後に「全体トーンの一貫性」を1文で評価。
+
+[response letter全文を貼る]</pre>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ C ══ -->
+<section id="C">
+  <div class="section-header">
+    <span class="section-label">C</span>
+    <h2>Push back・反論文</h2>
+    <span class="section-count">11個 / #C-17〜#C-27</span>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">C-17</span>
+      <span class="card-title">polite_pushbackの英文起草</span>
+      <button class="copy-btn" onclick="copyPrompt('p-C17')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> 標準的な反論文</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #34, #35, #40</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-C17">以下のreviewer commentに対し、polite pushbackの返信を書け。
+
+構造:
+1. 同意できる部分の確認 (1文)
+2. 異論の根拠 (2〜3文、データ・引用付き)
+3. 落としどころ提案 (1文)
+
+語彙制約: scope / mechanism / scale / generalizability / parsimony を1つ以上使う。
+禁止: "I disagree", "this is wrong", "the reviewer misunderstands"
+
+[reviewer comment + 自分の異論ポイントを貼る]</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">C-18</span>
+      <span class="card-title">strong_pushbackの英文起草 (限定的)</span>
+      <button class="copy-btn" onclick="copyPrompt('p-C18')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> 明確な誤りや不合理な要求への強めの反論</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #34</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-C18">以下のreviewer commentは明らかに事実誤認 / 不合理な要求である。strong pushbackを書け。
+
+構造:
+1. 該当箇所の引用 (1文)
+2. 反証の根拠 (3〜5文、論文中の図表・既存文献を明示)
+3. editorへの支援要請 (1文、optional)
+
+語調: 礼儀正しいが断定的。"We respectfully disagree" は使うが "I disagree" は使わない。
+
+[reviewer comment + 反証の根拠を貼る]</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">C-19</span>
+      <span class="card-title">deflect文 (political_signal/L3)</span>
+      <button class="copy-btn" onclick="copyPrompt('p-C19')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> 著名研究者の引用要求などを礼儀正しく流す</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #33</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-C19">以下のreviewer commentは政治的シグナル (特定文献の引用要求) である。受け流す返信を書け。
+
+構造:
+1. 提案への感謝 (1文)
+2. 該当文献を本文に追加した旨 / 簡潔な言及で済ます旨 (1〜2文)
+3. 主要結論には影響しない旨を簡潔に添える (1文)
+
+[reviewer comment + 該当文献情報を貼る]</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">C-20</span>
+      <span class="card-title">scope再定義文 (fundamentalに対峙)</span>
+      <button class="copy-btn" onclick="copyPrompt('p-C20')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> ちゃぶ台返しをscope内に絞り込む</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #37</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-C20">以下のreviewer commentは研究の根本前提への異議である。論文のscopeを再定義する返信を書け。
+
+構造:
+1. reviewerの論点が重要であることの確認 (1文)
+2. 本論文のscopeはX (…) であり、reviewer論点Yは別議題である旨 (2〜3文)
+3. Discussion / Limitation節への追加で対応する旨 (1文)
+
+[reviewer comment + 本研究のscope (1〜2文) を貼る]</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">C-21</span>
+      <span class="card-title">部分実装の交渉文 (data/L2)</span>
+      <button class="copy-btn" onclick="copyPrompt('p-C21')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> 追加実験を「核心は実装、末端は別稿」に分ける</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #38</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-C21">以下のreviewer commentは追加実験を要求している。「核心部分は実施、周辺部分は別稿に回す」と分けた返信を書け。
+
+構造:
+1. 提案への感謝 + 一部実装の宣言 (1〜2文)
+2. 実施した部分の結果要約 (2〜3文)
+3. 別稿に回す部分の理由 (時間制約 / scope外) (1〜2文)
+
+[reviewer comment + 自分の実装計画を貼る]</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">C-22</span>
+      <span class="card-title">礼儀ある反論の語彙リスト生成</span>
+      <button class="copy-btn" onclick="copyPrompt('p-C22')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> 同じ単語の繰り返しを避ける</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #40</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-C22">以下のreviewer commentに反論する際に使える、礼儀正しい英語フレーズを10個リストせよ。
+
+カテゴリ:
+- 同意フレーム: "We appreciate ..." 系 3個
+- 異論フレーム: "We respectfully ..." 系 3個
+- 根拠フレーム: "Our data show that ..." 系 2個
+- 落としどころ: "We have clarified ..." 系 2個
+
+[reviewer commentを貼る]</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">C-23</span>
+      <span class="card-title">editorへのsupport要請文</span>
+      <button class="copy-btn" onclick="copyPrompt('p-C23')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> 不当なreviewerに対しeditorの判断を仰ぐ</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #34, #37</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-C23">以下のreviewer commentは不当だと著者は判断している。response letterとは別に、editor宛に「reviewer Xのcomment Yへの対応について判断を仰ぐ」短い英文を起草せよ。
+
+長さ: 100〜150 words
+トーン: 礼儀正しく、感情を排除し、事実ベース。
+
+[reviewer comment + 不当と判断する根拠を貼る]</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">C-24</span>
+      <span class="card-title">反論の論理穴をAIに探させる (自分側)</span>
+      <button class="copy-btn" onclick="copyPrompt('p-C24')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> 自分の反論を送る前のセルフチェック</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #28</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-C24">以下は私が書いたresponse letterの一節 (reviewerへの反論部分) である。
+あなたは厳しいreviewer役だ。この反論文に含まれる論理穴・飛躍・データ不足を5つ列挙せよ。
+
+[自分の反論文の該当部分を貼る]</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">C-25</span>
+      <span class="card-title">reviewerの論理穴を探す</span>
+      <button class="copy-btn" onclick="copyPrompt('p-C25')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> 反論の根拠を強化</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #28</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-C25">以下はreviewerによるcritiqueである。このcritique自身に含まれる論理穴・前提の誤り・引用不足を5つ列挙せよ。
+
+[reviewer commentを貼る]</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">C-26</span>
+      <span class="card-title">相手の語彙を抽出して反論に組み込む</span>
+      <button class="copy-btn" onclick="copyPrompt('p-C26')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> reviewer自身の語彙で反論することで受け入れられやすくする</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #40</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-C26">以下のreviewer commentから、そのreviewerが頻用する技術用語・概念用語を10個抽出せよ。
+
+出力形式: 用語 | 出現回数 | 使われている文脈の1行要約
+
+[reviewer全commentsを貼る]</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">C-27</span>
+      <span class="card-title">"agree with X but not Y" 構造の起草</span>
+      <button class="copy-btn" onclick="copyPrompt('p-C27')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> 部分同意・部分反論の典型パターン</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #38, #40</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-C27">以下のreviewer commentに対し、「XにはするがYには同意しない」構造で返信を書け。
+
+構造:
+1. X (同意できる点) の引用と賛同 (1〜2文)
+2. Y (同意できない点) の特定 (1文)
+3. Yへの反論根拠 (2〜3文、データ付き)
+4. 全体としての落としどころ (1文)
+
+[reviewer comment + 自分の同意点X / 不同意点Yを貼る]</pre>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ D ══ -->
+<section id="D">
+  <div class="section-header">
+    <span class="section-label">D</span>
+    <h2>追加実験判断</h2>
+    <span class="section-count">7個 / #D-28〜#D-34</span>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">D-28</span>
+      <span class="card-title">cost-benefit分析 (工数×採択確率)</span>
+      <button class="copy-btn" onclick="copyPrompt('p-D28')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> やる/やらない判断の数値化</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #24</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-D28">以下の追加実験要求について、cost-benefitを数値化せよ。
+
+評価軸:
+- 工数: 必要週数 (実験 + 解析 + 執筆)
+- 採択確率の押し上げ: 0〜30% でレンジ推定
+- 代替手段の有無: yes/no
+- 推奨判断: 全部実施 / 部分実施 / 不実施 + 1行根拠
+
+[reviewerの追加実験要求 + 自分のラボ環境を貼る]</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">D-29</span>
+      <span class="card-title">部分実装案を3つ生成</span>
+      <button class="copy-btn" onclick="copyPrompt('p-D29')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> 「全部やる/全部断る」の二択を避ける</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #25, #29</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-D29">以下の追加実験要求に対し、部分実装案を3つ生成せよ。
+
+各案について:
+- 実装範囲 (1文)
+- 工数 (週)
+- reviewerの納得度の見積もり (low / mid / high)
+
+[reviewerの追加実験要求を貼る]</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">D-30</span>
+      <span class="card-title">代替データの候補抽出</span>
+      <button class="copy-btn" onclick="copyPrompt('p-D30')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> 「やらない」判断の補強</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #27</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-D30">以下の追加実験要求に対し、追加実験を行わずに済ませるための代替データ・代替論証を3つ提案せよ。
+
+候補軸:
+- 既存figure / supplementaryの再利用
+- 先行論文の引用による補強
+- 解析のre-runによる再検証
+
+[reviewerの追加実験要求 + 自分の論文の現有データ概要を貼る]</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">D-31</span>
+      <span class="card-title">editorへの期限延長依頼文</span>
+      <button class="copy-btn" onclick="copyPrompt('p-D31')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> extension申請の標準テンプレ</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #29</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-D31">以下の状況でeditorに提出期限の延長 (X週間) を依頼する短い英文を起草せよ。
+
+長さ: 80〜120 words
+構造:
+1. 現在進行中の追加実験の要約 (1文)
+2. 必要な追加期間と理由 (1〜2文)
+3. 改訂版の質を確保する旨 (1文)
+
+トーン: 言い訳をしない、事実ベース。
+
+[現在の状況・延長必要週数を貼る]</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">D-32</span>
+      <span class="card-title">editorへの優先度確認文</span>
+      <button class="copy-btn" onclick="copyPrompt('p-D32')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> 追加実験3件以上の場合に確認する</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #30</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-D32">以下はreviewerから要求された追加実験のリストである (N件、合計工数推定X週)。editorに対し、優先度の確認を依頼する短い英文を起草せよ。
+
+長さ: 100〜150 words
+構造:
+1. 要求一覧の事実列挙
+2. 全件実施はX週かかる旨
+3. editorにtop priority 2〜3件を指定してほしい旨
+
+[追加実験リスト + 工数を貼る]</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">D-33</span>
+      <span class="card-title">必要N (sample size) の見積もり</span>
+      <button class="copy-btn" onclick="copyPrompt('p-D33')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> 追加実験の規模感をAIに検算させる</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #24</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-D33">以下の追加実験について、必要なサンプル数を統計的に見積もれ。
+
+提供情報:
+- 既存データのeffect size
+- 検出したい差
+- 想定power (default 0.8) とalpha (default 0.05)
+
+出力: 必要N | 計算根拠 (Cohen's f / d など) | 注意点
+
+[既存データeffect size + 検出したい差を貼る]</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">D-34</span>
+      <span class="card-title">「やらない」判断の根拠文</span>
+      <button class="copy-btn" onclick="copyPrompt('p-D34')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> 不実施をreviewerに通告する文</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #27</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-D34">以下の追加実験要求について、不実施を選択した。reviewerへの返信文を起草せよ。
+
+構造:
+1. 提案への感謝 (1文)
+2. 不実施の理由3つ (scope / 既存データの十分性 / 別稿予定) (3〜4文)
+3. 代替で対応した内容 (1〜2文)
+
+トーン: 防御的にならない、淡々と事実を述べる。
+
+[reviewerの要求 + 不実施を選んだ理由を貼る]</pre>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ E ══ -->
+<section id="E">
+  <div class="section-header">
+    <span class="section-label">E</span>
+    <h2>再投稿・Journal選定</h2>
+    <span class="section-count">6個 / #E-35〜#E-40</span>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">E-35</span>
+      <span class="card-title">reject後の意思決定フレーム</span>
+      <button class="copy-btn" onclick="copyPrompt('p-E35')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> 24時間後の再評価</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #43</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-E35">以下のreject letterとreviewer commentsを読み、次の4軸で再投稿戦略を整理せよ。
+
+軸:
+1. 主要critiqueは本質的か (yes / mixed / no)
+2. 同IF tierへの再投稿可能性
+3. 1段下IFへの投稿で許容できるか
+4. 大幅改訂の必要性
+
+出力: 1軸ごとに1〜2文の判定 + 最終推奨 (再投稿先候補)
+
+[reject letter + reviewer commentsを貼る]</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">E-36</span>
+      <span class="card-title">Journal候補リスト生成 (scope一致重視)</span>
+      <button class="copy-btn" onclick="copyPrompt('p-E36')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> IFよりscopeの一致度で選ぶ</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #46</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-E36">以下の論文abstractと現IFをもとに、再投稿先候補を5誌挙げよ。
+
+選定基準:
+- scope一致度を最優先 (IFより重視)
+- IFは現状の±50%範囲
+- review期間6ヶ月以内が望ましい
+
+出力: ジャーナル名 | scope一致度 (1-5) | IF | 平均review期間 | 1行コメント
+
+[論文abstract + 現状の投稿先IFを貼る]</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">E-37</span>
+      <span class="card-title">IF 1段下の現実的選択肢生成</span>
+      <button class="copy-btn" onclick="copyPrompt('p-E37')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> 落とす覚悟を持つための候補出し</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #44</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-E37">以下の論文abstractに対し、現状のIFより1段下のジャーナル候補を5誌挙げよ。
+
+評価軸:
+- IF (target × 0.4〜0.7 のレンジ)
+- 採択率30%以上
+- scope一致度 high
+
+[論文abstract + 現IFを貼る]</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">E-38</span>
+      <span class="card-title">reformatting必要箇所の差分抽出</span>
+      <button class="copy-btn" onclick="copyPrompt('p-E38')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> 再投稿時のformat調整リスト</span>
+      <span class="meta-tag"><span class="label">手筋:</span> —</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-E38">以下の旧投稿先のformat guidelinesと新投稿先のformat guidelinesを比較し、修正必須箇所を箇条書きで列挙せよ。
+
+軸: 文字数制限 / 図表数制限 / Reference style / Abstract構造 / Cover letter形式
+
+[旧format / 新formatを貼る]</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">E-39</span>
+      <span class="card-title">前回査読を共有するcover letter</span>
+      <button class="copy-btn" onclick="copyPrompt('p-E39')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> 編集者に前経緯を渡して判断を加速</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #45</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-E39">以下の前回査読の経緯を、新ジャーナルのcover letterに組み込む短文 (200 words) を起草せよ。
+
+構造:
+1. 論文の主要貢献 (1〜2文)
+2. 前ジャーナルでのreject理由を1行で要約 (defensiveにならない)
+3. 前査読で指摘された主要3点に既に対応済みである旨
+4. 新ジャーナルのscopeへの適合理由
+
+[論文タイトル + 前回reject理由 + 主要対応点3つを貼る]</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">E-40</span>
+      <span class="card-title">投稿先比較表の生成</span>
+      <button class="copy-btn" onclick="copyPrompt('p-E40')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> 5誌から最終1誌に絞る判断補助</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #46</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-E40">以下の候補5誌について、比較表を生成せよ。
+
+軸: ジャーナル名 / IF / 採択率 / 平均review期間 / scope一致度 (1-5) / 過去1年で類似論文掲載数 / 推奨度 (1-5)
+
+[候補5誌のリストを貼る]</pre>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ F ══ -->
+<section id="F">
+  <div class="section-header">
+    <span class="section-label">F</span>
+    <h2>英文 Tone 整備</h2>
+    <span class="section-count">6個 / #F-41〜#F-46</span>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">F-41</span>
+      <span class="card-title">過度な敬語の検出と削除</span>
+      <button class="copy-btn" onclick="copyPrompt('p-F41')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> 弱腰表現を排除</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #21</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-F41">以下の英文response letterから、過度に丁寧な表現を検出し、簡潔な表現に置き換えよ。
+
+検出対象例:
+- "We would be very grateful if ..."
+- "We sincerely apologize ..."
+- "We humbly suggest ..."
+
+置き換え方針: 事実ベースの直接的表現に。
+
+[response letter草稿を貼る]</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">F-42</span>
+      <span class="card-title">冗長語 (filler) の検出</span>
+      <button class="copy-btn" onclick="copyPrompt('p-F42')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> 「実は」類の検出と削除</span>
+      <span class="meta-tag"><span class="label">手筋:</span> —</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-F42">以下の文章から、冗長語を検出して削除せよ。
+
+検出対象 (日本語): 「実は」「ご存知の通り」「言うまでもなく」
+検出対象 (英語): "indeed", "as is well known", "it goes without saying"
+
+出力: 検出箇所 + 削除後の文
+
+[文章を貼る]</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">F-43</span>
+      <span class="card-title">感想を強要する表現を削除</span>
+      <button class="copy-btn" onclick="copyPrompt('p-F43')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> 客観的記述への変換</span>
+      <span class="meta-tag"><span class="label">手筋:</span> —</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-F43">以下の文章から、感想を読者・査読者に強要する表現を検出し、客観的記述に置き換えよ。
+
+検出対象 (日本語): 「驚くべきことに」「興味深いことに」「重要なことに」
+検出対象 (英語): "surprisingly", "interestingly", "importantly"
+
+[文章を貼る]</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">F-44</span>
+      <span class="card-title">non-native特有の弱腰表現の修正</span>
+      <button class="copy-btn" onclick="copyPrompt('p-F44')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> 第3章で扱う典型罠の機械化</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #21</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-F44">以下の英文から、non-native著者特有の弱腰表現を検出して修正せよ。
+
+検出対象: "perhaps", "it may be possible", "we believe", "we hope", "we feel"
+修正方針:
+- データに基づく断定 ("Figure 3 shows ...")
+- "we believe X" → "X is supported by ..."
+
+[英文を貼る]</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">F-45</span>
+      <span class="card-title">同一文章を3視点で読み返す</span>
+      <button class="copy-btn" onclick="copyPrompt('p-F45')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> 著者・reviewer・editorの3視点で違和感を抽出</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #49</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-F45">以下のresponse letterの一節を、以下の3視点で順番に読み、違和感・改善点を3つずつ列挙せよ。
+
+視点:
+1. reviewerの立場 (自分が書いたcritiqueにこう返されたら?)
+2. editorの立場 (双方の対立をどう処理したいか?)
+3. 共著者の立場 (自分の名前で出ていいか?)
+
+[response letterの一節を貼る]</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">F-46</span>
+      <span class="card-title">reviewerの語彙との整合性チェック</span>
+      <button class="copy-btn" onclick="copyPrompt('p-F46')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> 反論文が相手の語彙の中で書けているか確認</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #40</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-F46">以下の (a) reviewer commentと (b) 自分の反論文を比較し、(a) で使われている技術用語のうち (b) で再利用されているものをリストせよ。
+
+出力:
+- 再利用された用語 (count)
+- 再利用されていない重要用語 (改善余地)
+- 全体の語彙整合度 (high / mid / low)
+
+[(a) と (b) を貼る]</pre>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ G ══ -->
+<section id="G">
+  <div class="section-header">
+    <span class="section-label">G</span>
+    <h2>メタ・自己点検</h2>
+    <span class="section-count">4個 / #G-47〜#G-50</span>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">G-47</span>
+      <span class="card-title">自分の感情状態を切り分ける</span>
+      <button class="copy-btn" onclick="copyPrompt('p-G47')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> コメントを「自分への評価」と読まないため</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #47</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-G47">以下は私が今受け取ったreviewer commentである。あなたはコーチ役だ。
+次の3段階に切り分けて整理せよ。
+
+1. commentが示す技術的指摘 (感情を排除した要約1〜2文)
+2. 私が感じている可能性のある感情 (列挙3つ)
+3. 感情を脇に置いた行動可能なnext step (3つ)
+
+[reviewer commentを貼る]</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">G-48</span>
+      <span class="card-title">1日の作業時間配分 (2時間制限)</span>
+      <button class="copy-btn" onclick="copyPrompt('p-G48')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> メンタル維持のための時間設計</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #48</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-G48">以下のrevise残タスクを、1日2時間制限でN日に配分せよ。
+
+評価軸:
+- タスクの重さ (heavy / mid / light)
+- 集中力消費度
+- 一日に同種タスクを連続させない
+
+出力: Day | 推奨タスク | 推定時間
+
+[残タスクリストを貼る]</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">G-49</span>
+      <span class="card-title">同僚レビュー用要約</span>
+      <button class="copy-btn" onclick="copyPrompt('p-G49')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> 反論文を他人に見せる前の準備</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #49</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-G49">以下の反論文を、忙しい同僚に5分で読んでもらうための要約を生成せよ。
+
+構造:
+- 背景1行
+- reviewerの指摘1行
+- 自分の反論の核心1行
+- 同僚に確認してほしい3点 (箇条書き)
+
+[反論文 + reviewer commentを貼る]</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="pid">G-50</span>
+      <span class="card-title">累計revise経験の棚卸し</span>
+      <button class="copy-btn" onclick="copyPrompt('p-G50')">コピー</button>
+    </div>
+    <div class="card-meta">
+      <span class="meta-tag"><span class="label">用途:</span> 経験を資産化する</span>
+      <span class="meta-tag"><span class="label">手筋:</span> #50</span>
+    </div>
+    <div class="prompt-body">
+      <pre class="prompt-text" id="p-G50">以下は私が今までに完了したreviseの記録 (論文タイトル / journal / round数 / 主要critique) である。次の3軸で棚卸しせよ。
+
+軸:
+1. 自分が強いcritiqueタイプ (data / methodology等)
+2. 自分が苦手なcritiqueタイプ
+3. 次回reviseで活かせるlearning 3つ
+
+[revise履歴を貼る]</pre>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p><strong>リバイスの技法</strong> — 1,317件のデータと50の手筋で査読を乗り越える</p>
+  <p style="margin-top:8px;">プロンプトはドラフト生成のための道具です。最終的な文責は著者にあります。</p>
+  <p style="margin-top:8px; font-size:0.75rem;">v1.0 · 2026</p>
+</footer>
+
+<script>
+function copyPrompt(id) {
+  const el = document.getElementById(id);
+  const text = el.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = el.closest('.card').querySelector('.copy-btn');
+    const orig = btn.textContent;
+    btn.textContent = '✓ コピー済み';
+    btn.classList.add('ok');
+    setTimeout(() => {
+      btn.textContent = orig;
+      btn.classList.remove('ok');
+    }, 2000);
+  }).catch(() => {
+    // fallback for older browsers
+    const range = document.createRange();
+    range.selectNode(el);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+    document.execCommand('copy');
+    window.getSelection().removeAllRanges();
+  });
+}
+</script>
+</body>
+</html>
